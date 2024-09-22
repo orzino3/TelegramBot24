@@ -35,7 +35,7 @@ public class Constants
     public static final String MESSAGE_SURVEY_CREATION_1 = "אנא שלח את השאלה הראשונה לסקר.";
     public static final String MESSAGE_SURVEY_CREATION_2 = "בבקשה ספק בין 2 ל-4 תשובות אפשריות. הפרד את התשובות באמצעות פסיק.";
     public static final String MESSAGE_SURVEY_CREATION_2_ERROR = "כמות אפשרויות אינה תקינה. אנא ספק בין 2 ל-4 תשובות אפשריות. הפרד את התשובות באמצעות פסיק.";
-    public static final String MESSAGE_SURVEY_CREATION_1_SUCCESS = "שאלה נוספה בהצלחה. יש אפשרות לשלוח שאלה נוספת, או הקלד '/finish' על מנת להשלים את יצירת הסקר.";
+    public static final String MESSAGE_SURVEY_CREATION_1_SUCCESS = "שאלה נוספה בהצלחה. יש אפשרות לשלוח שאלה נוספת, או הקלד '/finish' על מנת להשלים את יצירת הסקר. במידה ותגיע למגבלת כמות השאלות, תתבקש לסיים את יצירת הסקר.";
     public static final String MESSAGE_SURVEY_CREATION_ANSWER_ADD = "אנא ספק בין 2 ל-4 תשובות אפשרויות עבור השאלה הנוספת, והפרד בין התשובות באמצעות פסיק.";
     public static final String MESSAGE_SURVEY_NO_ACTIVE = "אין סקר פעיל. אנא צור סקר באמצעות '/create_survey'.";
     public static final String MESSAGE_SURVEY_DELAY_SET = "סקר נוצר בהצלחה. האם תרצה לשלוח את הסקר באופן מיידי או לאחר השהייה מסוימת? הקלד 'מיידי' או ספק את מס' הדקות להשהייה (בדקות).";
