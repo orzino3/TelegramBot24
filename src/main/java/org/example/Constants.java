@@ -29,7 +29,8 @@ public class Constants
                 """;
 
     public static final String MESSAGE_SURVEY_ACTIVE = "יש כבר סקר פעיל. אנא המתן לסיומו.";
-    public static final String MESSAGE_SURVEY_CREATION_USER_LIMIT_ERROR = "על מנת ליצור סקר, חובה שיהיו 3 משתמשים רשומים.";
+    public static final String MESSAGE_SURVEY_CREATION_USER_LIMIT_ERROR_FIRST = "על מנת ליצור סקר, חובה שיהיו ";
+    public static final String MESSAGE_SURVEY_CREATION_USER_LIMIT_ERROR_SECOND = " משתמשים רשומים.";
     public static final String MESSAGE_SURVEY_CREATION_QUESTIONS_LIMIT_ERROR = "הגעת לכמות השאלות המקסימלית עבור הסקר. אנא השתמש בפקודה '/finish' על מנת להשלים את הסקר";
     public static final String MESSAGE_SURVEY_CREATION_1 = "אנא שלח את השאלה הראשונה לסקר.";
     public static final String MESSAGE_SURVEY_CREATION_2 = "בבקשה ספק בין 2 ל-4 תשובות אפשריות. הפרד את התשובות באמצעות פסיק.";
