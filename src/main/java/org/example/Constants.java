@@ -9,7 +9,7 @@ public class Constants
     public static final String OPTION_3 = "היי";
     public static final String CREATE = "/create_survey";
     public static final String FINISH = "/finish";
-    public static final int MIN_USER_LIMIT = 2;
+    public static final int MIN_USER_LIMIT = 3;
     public static final int MIN_ANSWER = 2;
     public static final int MAX_ANSWER = 4;
     public static final int MAX_QUESTION_NUM = 3;
