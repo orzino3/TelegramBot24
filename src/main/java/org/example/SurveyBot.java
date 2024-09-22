@@ -106,7 +106,7 @@ public class SurveyBot extends TelegramLongPollingBot {
         }
 
         if (registeredUsers.size() < Constants.MIN_USER_LIMIT) {
-            sendMessageToUser(user.getId(), Constants.MESSAGE_SURVEY_CREATION_USER_LIMIT_ERROR);
+            sendMessageToUser(user.getId(), Constants.MESSAGE_SURVEY_CREATION_USER_LIMIT_ERROR_FIRST + Constants.MIN_USER_LIMIT + Constants.MESSAGE_SURVEY_CREATION_USER_LIMIT_ERROR_SECOND);
             return;
         }
 
