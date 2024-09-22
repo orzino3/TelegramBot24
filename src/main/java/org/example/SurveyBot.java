@@ -16,9 +16,9 @@ public class SurveyBot extends TelegramLongPollingBot {
     private final Map<Long, Survey> surveyCreators = new HashMap<>();
     private Survey activeSurvey = null;
     private final Map<Long, Map<Integer, Integer>> userResponses = new HashMap<>();
-    private final Map<Long, Integer> currentQuestionIndex = new HashMap<>(); // Track which question a user is answering
-    private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1); // Scheduler for delayed sending
-    private final Map<Long, Boolean> waitingForDelayInput = new HashMap<>();  // Track if user is selecting delay time
+    private final Map<Long, Integer> currentQuestionIndex = new HashMap<>(); 
+    private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1); 
+    private final Map<Long, Boolean> waitingForDelayInput = new HashMap<>();  
     private int questionCount;
 
     public SurveyBot(){
@@ -60,8 +60,6 @@ public class SurveyBot extends TelegramLongPollingBot {
             int totalUsers = registeredUsers.size();
             String notification = userDisplayName + Constants.MESSAGE_JOINED + totalUsers;
             notifyAllMembers(notification);
-
-            // Send instructions to the newly registered user
             sendInstructionsToUser(userId);
         } else {
             sendMessageToUser(userId, Constants.MESSAGE_ALREADY_JOINED );
@@ -71,7 +69,6 @@ public class SurveyBot extends TelegramLongPollingBot {
 
     private void sendInstructionsToUser(Long userId) {
         String instructions = Constants.MESSAGE_INSTRUCTION;
-
         sendMessageToUser(userId, instructions);
     }
 
@@ -154,12 +151,12 @@ public class SurveyBot extends TelegramLongPollingBot {
         surveyCreators.remove(user.getId());
 
         sendMessageToUser(user.getId(), Constants.MESSAGE_SURVEY_DELAY_SET);
-        waitingForDelayInput.put(user.getId(), true);  // Expect the delay input next
+        waitingForDelayInput.put(user.getId(), true);  
     }
 
     private void handleDelayInput(User user, String messageText) {
         Long userId = user.getId();
-        waitingForDelayInput.remove(userId);  // Stop waiting for delay input
+        waitingForDelayInput.remove(userId);  
 
         if (messageText.equalsIgnoreCase(Constants.MESSAGE_SURVEY_DELAY_IMMEDIATELY)) {
             sendMessageToUser(userId, Constants.MESSAGE_SURVEY_DELAY_IMMEDIATELY_SEND);
@@ -184,7 +181,6 @@ public class SurveyBot extends TelegramLongPollingBot {
     private void scheduleSurveySending(int delayMinutes) {
         scheduler.schedule(() -> {
             sendSurveyToAllUsers();
-            // Schedule sending survey results after 5 minutes from the moment the survey is sent
             scheduler.schedule(this::sendSurveyResultsToCreator, Constants.MAX_ANSWER_TIME, TimeUnit.MINUTES);
         }, delayMinutes, TimeUnit.MINUTES);
     }
@@ -194,21 +190,19 @@ public class SurveyBot extends TelegramLongPollingBot {
             return;
         }
 
-        // Clear previous responses and question indices before starting a new survey
         userResponses.clear();
         currentQuestionIndex.clear();
 
         for (Long userId : registeredUsers) {
-            sendNextQuestion(userId, 0);  // Start asking the first question
+            sendNextQuestion(userId, 0);  
         }
 
-        // Schedule survey results after 5 minutes even if all users haven't responded
         scheduler.schedule(this::sendSurveyResultsToCreator, Constants.MAX_ANSWER_TIME, TimeUnit.MINUTES);
     }
 
     private void sendNextQuestion(Long userId, int questionIndex) {
         if (activeSurvey == null || questionIndex >= activeSurvey.getQuestions().size()) {
-            return;  // No more questions
+            return;  
         }
 
         Question question = activeSurvey.getQuestions().get(questionIndex);
@@ -224,7 +218,7 @@ public class SurveyBot extends TelegramLongPollingBot {
         message.setText(message.getText() + "\n" + answersText.toString());
         try {
             execute(message);
-            currentQuestionIndex.put(userId, questionIndex);  // Track the current question
+            currentQuestionIndex.put(userId, questionIndex);  
         } catch (TelegramApiException e) {
             e.printStackTrace();
         }
@@ -232,7 +226,7 @@ public class SurveyBot extends TelegramLongPollingBot {
 
     private void handleSurveyResponse(User user, String messageText) {
         Long userId = user.getId();
-        int questionIndex = currentQuestionIndex.get(userId);  // Get the current question being answered
+        int questionIndex = currentQuestionIndex.get(userId);  
 
         try {
             int answerIndex = Integer.parseInt(messageText) - 1;
@@ -244,14 +238,14 @@ public class SurveyBot extends TelegramLongPollingBot {
 
                 int nextQuestionIndex = questionIndex + 1;
                 if (nextQuestionIndex < activeSurvey.getQuestions().size()) {
-                    sendNextQuestion(userId, nextQuestionIndex);  // Ask the next question
+                    sendNextQuestion(userId, nextQuestionIndex);  
                 } else {
                     sendMessageToUser(user.getId(), Constants.MESSAGE_SURVEY_COMPLETE);
-                    currentQuestionIndex.remove(userId);  // Remove tracking after completing all questions
+                    currentQuestionIndex.remove(userId);  
 
                     if (allUsersResponded()) {
                         sendSurveyResultsToCreator();
-                        activeSurvey = null;  // Reset after survey is done
+                        activeSurvey = null;  
                     }
                 }
             }
@@ -275,9 +269,9 @@ public class SurveyBot extends TelegramLongPollingBot {
         }
 
         User creator = activeSurvey.getCreator();
-        Map<Integer, Map<Integer, Integer>> aggregatedResponses = new HashMap<>();  // questionIndex -> answerIndex -> count
+        Map<Integer, Map<Integer, Integer>> aggregatedResponses = new HashMap<>();  
 
-        // Aggregate responses
+        
         for (Map.Entry<Long, Map<Integer, Integer>> entry : userResponses.entrySet()) {
             for (Map.Entry<Integer, Integer> questionResponse : entry.getValue().entrySet()) {
                 int questionIndex = questionResponse.getKey();
@@ -290,42 +284,42 @@ public class SurveyBot extends TelegramLongPollingBot {
 
         StringBuilder results = new StringBuilder(Constants.MESSAGE_SURVEY_RESULT);
 
-        // Iterate through each question and calculate results
+        
         for (int questionIndex = 0; questionIndex < activeSurvey.getQuestions().size(); questionIndex++) {
             Question question = activeSurvey.getQuestions().get(questionIndex);
             results.append(Constants.MESSAGE_SURVEY_QUESTION).append(question.getQuestionText()).append("\n");
 
-            // Get the total number of votes for this question
+            
             int totalVotes = aggregatedResponses.getOrDefault(questionIndex, new HashMap<>())
                     .values().stream().mapToInt(Integer::intValue).sum();
 
-            // If no one voted on this question, show 0 votes
+            
             if (totalVotes == 0) {
                 results.append(Constants.MESSAGE_SURVEY_NO_RESPONSE);
                 continue;
             }
 
-            // Display vote count and percentage for each answer
+            
             Map<Integer, Integer> answerCounts = aggregatedResponses.getOrDefault(questionIndex, new HashMap<>());
             for (int i = 0; i < question.getAnswers().size(); i++) {
                 String answer = question.getAnswers().get(i);
                 int voteCount = answerCounts.getOrDefault(i, 0);
 
-                // Calculate percentage
+                
                 double percentage = ((double) voteCount / totalVotes) * 100;
 
-                // Append result with vote count and percentage
+               
                 results.append(answer).append(": ")
                         .append(voteCount).append(Constants.MESSAGE_SURVEY_VOTE_TEXT_1).append(voteCount != 1 ? Constants.MESSAGE_SURVEY_VOTE_TEXT_MULTIPLE : "")
                         .append(" (").append(String.format("%.2f", percentage)).append("%)").append("\n");
             }
-            results.append("\n");  // Separate results for each question
+            results.append("\n");  
         }
 
-        // Send the results to the creator
+        
         sendMessageToUser(creator.getId(), results.toString());
 
-        // Reset the active survey
+        
         activeSurvey = null;
     }
 
