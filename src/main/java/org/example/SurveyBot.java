@@ -19,6 +19,11 @@ public class SurveyBot extends TelegramLongPollingBot {
     private final Map<Long, Integer> currentQuestionIndex = new HashMap<>(); // Track which question a user is answering
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1); // Scheduler for delayed sending
     private final Map<Long, Boolean> waitingForDelayInput = new HashMap<>();  // Track if user is selecting delay time
+    private int questionCount;
+
+    public SurveyBot(){
+        this.questionCount = 0;
+    }
 
     @Override
     public void onUpdateReceived(Update update) {
@@ -110,23 +115,31 @@ public class SurveyBot extends TelegramLongPollingBot {
     }
 
     private void handleSurveyCreation(User user, String messageText) {
-        Survey survey = surveyCreators.get(user.getId());
+        if (questionCount < 6) {
+            Survey survey = surveyCreators.get(user.getId());
 
 
-        if (!survey.hasFirstQuestion()) {
-            survey.addQuestion(messageText);
-            sendMessageToUser(user.getId(), Constants.MESSAGE_SURVEY_CREATION_2);
-        } else if (!survey.hasEnoughAnswers()) {
-            List<String> answers = Arrays.asList(messageText.split(","));
-            if (answers.size() < Constants.MIN_ANSWER || answers.size() > Constants.MAX_ANSWER) {
-                sendMessageToUser(user.getId(), Constants.MESSAGE_SURVEY_CREATION_2_ERROR);
+            if (!survey.hasFirstQuestion()) {
+                survey.addQuestion(messageText);
+                sendMessageToUser(user.getId(), Constants.MESSAGE_SURVEY_CREATION_2);
+            } else if (!survey.hasEnoughAnswers()) {
+                List<String> answers = Arrays.asList(messageText.split(","));
+                if (answers.size() < Constants.MIN_ANSWER || answers.size() > Constants.MAX_ANSWER) {
+                    sendMessageToUser(user.getId(), Constants.MESSAGE_SURVEY_CREATION_2_ERROR);
+                } else {
+                    survey.addAnswers(answers);
+                    sendMessageToUser(user.getId(), Constants.MESSAGE_SURVEY_CREATION_1_SUCCESS);
+                }
             } else {
-                survey.addAnswers(answers);
-                sendMessageToUser(user.getId(), Constants.MESSAGE_SURVEY_CREATION_1_SUCCESS);
+                survey.addQuestion(messageText);
+                sendMessageToUser(user.getId(), Constants.MESSAGE_SURVEY_CREATION_ANSWER_ADD);
             }
-        } else {
-            survey.addQuestion(messageText);
-            sendMessageToUser(user.getId(), Constants.MESSAGE_SURVEY_CREATION_ANSWER_ADD);
+            questionCount++;
+        }
+
+        else {
+            sendMessageToUser(user.getId(), Constants.MESSAGE_SURVEY_CREATION_QUESTIONS_LIMIT_ERROR);
+            return;
         }
     }
 
